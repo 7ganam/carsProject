@@ -1,0 +1,23 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "asteasolutions"
+  ],
+  "flagWords": [],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    "*.min.js",
+    "*.d.ts"
+  ],
+  "dictionaries": [
+    "typescript",
+    "node",
+    "npm",
+    "html",
+    "css"
+  ]
+}
