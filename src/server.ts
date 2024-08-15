@@ -6,6 +6,7 @@ import { pino } from "pino";
 import { openAPIRouter } from "@/api-docs/openAPIRouter";
 import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
 import { userRouter } from "@/api/user/userRouter";
+import { carRouter } from "@/api/car/car.router";
 import { productRouter } from "@/api/product/productRouter";
 import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
@@ -31,6 +32,8 @@ app.use(requestLogger);
 // Routes
 app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
+app.use("/cars", carRouter);
+
 app.use("/products", productRouter);
 
 // Swagger UI
