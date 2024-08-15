@@ -1,21 +1,20 @@
 import { StatusCodes } from "http-status-codes";
 
 import type { IProduct } from "@/api/product/productModel";
-import { ProductRepository } from "@/api/product/productRepository";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { logger } from "@/server";
+import ProductModel, { ProductModelType } from "@/api/product/productModel";
 
 export class ProductService {
-  private productRepository: ProductRepository;
+  private productRepository: ProductModelType;
 
-  constructor(repository: ProductRepository = new ProductRepository()) {
+  constructor(repository: ProductModelType = ProductModel) {
     this.productRepository = repository;
   }
 
-  // Retrieves all products from the database
   async findAll(): Promise<ServiceResponse<IProduct[] | null>> {
     try {
-      const products = await this.productRepository.findAllAsync();
+      const products = await this.productRepository.find();
       if (!products || products.length === 0) {
         return ServiceResponse.failure(
           "No Products found",
@@ -32,15 +31,16 @@ export class ProductService {
       return ServiceResponse.failure(
         "An error occurred while retrieving products.",
         null,
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        JSON.stringify(ex)
       );
     }
   }
 
   // Retrieves a single product by their ID
-  async findById(id: number): Promise<ServiceResponse<IProduct | null>> {
+  async findById(id: string): Promise<ServiceResponse<IProduct | null>> {
     try {
-      const product = await this.productRepository.findByIdAsync(id);
+      const product = await this.productRepository.findById(id);
       if (!product) {
         return ServiceResponse.failure(
           "Product not found",
@@ -57,7 +57,30 @@ export class ProductService {
       return ServiceResponse.failure(
         "An error occurred while finding product.",
         null,
-        StatusCodes.INTERNAL_SERVER_ERROR
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        JSON.stringify(ex)
+      );
+    }
+  }
+
+  // Creates a new product
+  async create(
+    products: IProduct[]
+  ): Promise<ServiceResponse<IProduct[] | null>> {
+    try {
+      const newProduct = await this.productRepository.create(products);
+      return ServiceResponse.success<IProduct[]>(
+        "Product created successfully",
+        newProduct
+      );
+    } catch (ex) {
+      const errorMessage = `Error creating product: ${(ex as Error).message}`;
+      logger.error(errorMessage);
+      return ServiceResponse.failure(
+        "An error occurred while creating product.",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        JSON.stringify(ex)
       );
     }
   }

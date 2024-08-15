@@ -1,31 +1,32 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 
 import { z } from "zod";
 
-import { commonValidations } from "@/common/utils/commonValidation";
-
 extendZodWithOpenApi(z);
 
-export const ProductZodSchema = z.object({
+//first we create an I schema. which is a type representing what will the server return when a client is asking for a product
+export const IProductSchema = z.object({
+  _id: z.string(),
   name: z.string(),
   price: z.number(),
   description: z.string(),
 });
 
-export type IProduct = z.infer<typeof ProductZodSchema> & {
-  _id: string;
-};
+//then we infer an I type from the I schema
+export type IProduct = z.infer<typeof IProductSchema>;
 
+//then we define the mongoose schema. it usually has the same structure as the I schema (unfortunately, we can't infer it from the I schema)
 const ProductMongooseSchema: Schema = new Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String, required: true },
 });
 
-export default mongoose.model<IProduct>("Product", ProductMongooseSchema);
+//then we create the model. we have to pass a TS type to describe the type of the document.
+// mongoose will use this type without checking if it actually matches the document. so if your I type is out of sync from the mongoose schema. mongoose will give you the wrong type.
+const ProductModel = mongoose.model<IProduct>("Product", ProductMongooseSchema);
+export default ProductModel;
 
-// Input Validation for 'GET products/:id' endpoint
-export const GetProductSchema = z.object({
-  params: z.object({ id: commonValidations.id }),
-});
+type ProductModelType = Model<IProduct>;
+export { ProductModelType };
